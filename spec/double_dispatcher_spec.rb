@@ -2,7 +2,11 @@ require_relative 'spec_helper'
 require 'double_dispatcher'
 
 RSpec.describe DoubleDispatcher do
-  before(:all){ MyClass = Class.new }
+  before :all  do
+    MyClass = Class.new
+    MySubClass = Class.new(MyClass)
+  end
+
   let(:dispatcher){ DoubleDispatcher.new }
   let(:target){ double('target') }
 
@@ -41,5 +45,13 @@ RSpec.describe DoubleDispatcher do
 
     result = dispatcher.dispatch target
     expect(result).to eq(:the_response)
+  end
+
+  it 'calls the block matching an ancestor class of the target' do
+    dispatcher[MyClass] = ->(t){ t.the_message }
+    target = MySubClass.new
+
+    expect(target).to receive(:the_message)
+    dispatcher.dispatch target
   end
 end
