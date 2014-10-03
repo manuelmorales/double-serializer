@@ -1,6 +1,6 @@
 class DoubleDispatcher
-  def dispatch object
-    processors[object].call object
+  def dispatch target
+    processors[target].call target
   end
 
   def []= key, value
@@ -23,13 +23,13 @@ class DoubleDispatcher
     hash
   end
 
-  def match_ancestry hash, object
-    object.class.ancestors.each do |ancestor|
+  def match_ancestry hash, target
+    target.class.ancestors.each do |ancestor|
       return processors[ancestor] if processors.has_key?(ancestor)
     end
   end
 
   def default_proc
-    @default_proc ||= lambda{|o| o }
+    @default_proc ||= lambda{|t| t }
   end
 end
