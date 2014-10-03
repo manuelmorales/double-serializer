@@ -79,4 +79,17 @@ RSpec.describe DoubleDispatcher do
     expect(target).to receive(:the_message)
     dispatcher.dispatch target
   end
+
+  it 'allows defining custom matches' do
+    custom_matcher = Object.new
+
+    def custom_matcher.== value
+      value.to_i == 1
+    end
+
+    dispatcher.for(custom_matcher){|t| 'ONE' }
+
+    expect(dispatcher.dispatch '1').to eq('ONE')
+    expect(dispatcher.dispatch '2').to eq('2')
+  end
 end
