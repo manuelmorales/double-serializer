@@ -6,7 +6,7 @@ RSpec.configure do |c|
   c.color = true
 end
 
-class Serializer
+class CustomSerializer
   attr_accessor :finish_proc
 
   def serialize object
@@ -21,14 +21,14 @@ class Serializer
     @finish_proc = finish_proc
   end
 
+  def simplify object
+    simplifiers[object].call object
+  end
+
   private
 
   def finish object
     finish_proc.call object
-  end
-
-  def simplify object
-    simplifiers[object].call object
   end
 
   def simplifiers
@@ -39,7 +39,7 @@ class Serializer
     simplifiers = {
       Object => method(:do_nothing),
       Hash => method(:simplify_hash),
-      Array => method(:simplify_array),
+      Enumerable => method(:simplify_array),
     }
     simplifiers.default_proc = method(:match_ancestry)
     simplifiers
@@ -72,9 +72,9 @@ end
 
 Doc = Struct.new :name, :format
 
-RSpec.describe Serializer do
+RSpec.describe CustomSerializer do
   subject do
-    serializer = Serializer.new{|object| object.to_json }
+    serializer = CustomSerializer.new{|simplified_object| simplified_object.to_json }
     serializer[Doc]= lambda{|doc| {name: "#{doc.name}.#{doc.format}"} }
     serializer
   end
@@ -109,6 +109,28 @@ RSpec.describe Serializer do
     original = [Doc.new('report', 'txt'), Doc.new('audio', 'mp3')]
     result = subject.serialize original
     expect(result).to eq('[{"name":"report.txt"},{"name":"audio.mp3"}]')
+  end
+
+  it 'allows matching objects by themselves' do
+    original = double('original', custom_method: 'custom_result')
+    subject[original]= lambda{|o| o.custom_method }
+    result = subject.serialize original
+    expect(result).to eq('"custom_result"')
+  end
+
+  it 'allows nesting' do
+    complex_name = double('name', stringify: 'complex_report')
+
+    subject[complex_name]= lambda{|o| o.stringify }
+    subject[Doc] = lambda do |doc|
+      {
+        name: subject.simplify(doc.name)
+      }
+    end
+
+    original = Doc.new(complex_name, 'txt')
+    result = subject.serialize original
+    expect(result).to eq('{"name":"complex_report"}')
   end
 end
 
