@@ -18,6 +18,7 @@ class CustomSerializer
   end
 
   def initialize &finish_proc
+    finish_proc ||= method(:do_nothing)
     @finish_proc = finish_proc
   end
 
@@ -151,6 +152,15 @@ RSpec.describe CustomSerializer do
     original = Doc.new(complex_name, 'txt')
     result = subject.serialize original
     expect(result).to eq('{"name":"complex_report"}')
+  end
+
+  it 'leaves as a hashes and arrays by default' do
+    serializer = CustomSerializer.new
+    serializer[Doc]= lambda{|doc| {name: "#{doc.name}.#{doc.format}"} }
+    original = Doc.new('report', 'txt')
+
+    result = serializer.serialize original
+    expect(result).to eq({name:"report.txt"})
   end
 end
 
