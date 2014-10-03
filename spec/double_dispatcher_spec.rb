@@ -3,7 +3,8 @@ require 'double_dispatcher'
 
 RSpec.describe DoubleDispatcher do
   before :all  do
-    MyClass = Class.new
+    MyModule = Module.new
+    MyClass = Class.new{ include MyModule }
     MySubClass = Class.new(MyClass)
   end
 
@@ -50,6 +51,14 @@ RSpec.describe DoubleDispatcher do
   it 'calls the block matching an ancestor class of the target' do
     dispatcher[MyClass] = ->(t){ t.the_message }
     target = MySubClass.new
+
+    expect(target).to receive(:the_message)
+    dispatcher.dispatch target
+  end
+
+  it 'calls the block matching an ancestor module of the target' do
+    dispatcher[MyModule] = ->(t){ t.the_message }
+    target = MyClass.new
 
     expect(target).to receive(:the_message)
     dispatcher.dispatch target
