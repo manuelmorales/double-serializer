@@ -9,8 +9,9 @@ class DoubleDispatcher
 
   private
 
-  def initialize &block
+  def initialize custom_processors = {}, &block
     @default_proc = block
+    processors.merge! custom_processors
   end
 
   def processors

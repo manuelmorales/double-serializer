@@ -63,4 +63,12 @@ RSpec.describe DoubleDispatcher do
     expect(target).to receive(:the_message)
     dispatcher.dispatch target
   end
+
+  it 'allows defining processors when initializing' do
+    dispatcher = DoubleDispatcher.new(MyClass => ->(t){ t.the_message })
+    target = MyClass.new
+
+    expect(target).to receive(:the_message)
+    dispatcher.dispatch target
+  end
 end
