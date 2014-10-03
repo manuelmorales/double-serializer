@@ -14,7 +14,7 @@ class CustomSerializer
   end
 
   def []= key, value
-    simplifiers[key]= value
+    dispatcher[key]= value
   end
 
   def initialize &finish_proc
@@ -22,7 +22,7 @@ class CustomSerializer
   end
 
   def simplify object
-    simplifiers[object].call object
+    dispatcher.dispatch object
   end
 
   private
@@ -31,24 +31,16 @@ class CustomSerializer
     finish_proc.call object
   end
 
-  def simplifiers
-    @simplifiers ||= new_simplyfiers
+  def dispatcher
+    @dispatcher ||= build_dispatcher
   end
 
-  def new_simplyfiers
-    simplifiers = {
-      Object => method(:do_nothing),
-      Hash => method(:simplify_hash),
-      Enumerable => method(:simplify_array),
-    }
-    simplifiers.default_proc = method(:match_ancestry)
-    simplifiers
-  end
-
-  def match_ancestry hash, object
-    object.class.ancestors.each do |ancestor|
-      return simplifiers[ancestor] if simplifiers.has_key?(ancestor)
-    end
+  def build_dispatcher
+    dd = DoubleDispatcher.new
+    dd[Object]= method(:do_nothing)
+    dd[Hash] = method(:simplify_hash)
+    dd[Enumerable] = method(:simplify_array)
+    dd
   end
 
   def do_nothing object
@@ -66,6 +58,34 @@ class CustomSerializer
       key, value = key_value
       hash[key] = simplify(value)
       hash
+    end
+  end
+end
+
+class DoubleDispatcher
+  def dispatch object
+    processors[object].call object
+  end
+
+  def []= key, value
+    processors[key]= value
+  end
+
+  private
+
+  def processors
+    @processors ||= build_processors_hash
+  end
+
+  def build_processors_hash
+    hash = {}
+    hash.default_proc = method(:match_ancestry)
+    hash
+  end
+
+  def match_ancestry hash, object
+    object.class.ancestors.each do |ancestor|
+      return processors[ancestor] if processors.has_key?(ancestor)
     end
   end
 end
