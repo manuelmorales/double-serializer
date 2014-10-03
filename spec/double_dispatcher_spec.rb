@@ -71,4 +71,12 @@ RSpec.describe DoubleDispatcher do
     expect(target).to receive(:the_message)
     dispatcher.dispatch target
   end
+
+  it 'allows defining processors whith a block using for()' do
+    dispatcher.for(MyClass){|t| t.the_message }
+    target = MyClass.new
+
+    expect(target).to receive(:the_message)
+    dispatcher.dispatch target
+  end
 end

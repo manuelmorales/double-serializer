@@ -7,6 +7,10 @@ class DoubleDispatcher
     processors[key]= value
   end
 
+  def for key, &value
+    self[key]= value
+  end
+
   private
 
   def initialize custom_processors = {}, &block
