@@ -1,6 +1,6 @@
 class DoubleDispatcher
   def dispatch object
-    processors[object].call object
+    processors[object].call object rescue binding.pry
   end
 
   def []= key, value
@@ -14,7 +14,7 @@ class DoubleDispatcher
   end
 
   def build_processors_hash
-    hash = {}
+    hash = { Object => method(:do_nothing) }
     hash.default_proc = method(:match_ancestry)
     hash
   end
@@ -23,5 +23,9 @@ class DoubleDispatcher
     object.class.ancestors.each do |ancestor|
       return processors[ancestor] if processors.has_key?(ancestor)
     end
+  end
+
+  def do_nothing value
+    value
   end
 end
