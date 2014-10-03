@@ -9,4 +9,12 @@ RSpec.describe DoubleDispatcher do
     result = dispatcher.dispatch original
     expect(result).to eq(original)
   end
+
+  it 'calls the initialization block by default' do
+    dispatcher = DoubleDispatcher.new{|o| o.the_default_message }
+    original = Object.new
+    expect(original).to receive(:the_default_message)
+
+    dispatcher.dispatch original
+  end
 end

@@ -1,6 +1,6 @@
 class DoubleDispatcher
   def dispatch object
-    processors[object].call object rescue binding.pry
+    processors[object].call object
   end
 
   def []= key, value
@@ -9,12 +9,16 @@ class DoubleDispatcher
 
   private
 
+  def initialize &block
+    @default_proc = block
+  end
+
   def processors
     @processors ||= build_processors_hash
   end
 
   def build_processors_hash
-    hash = { Object => method(:do_nothing) }
+    hash = { Object => default_proc }
     hash.default_proc = method(:match_ancestry)
     hash
   end
@@ -25,7 +29,7 @@ class DoubleDispatcher
     end
   end
 
-  def do_nothing value
-    value
+  def default_proc
+    @default_proc ||= lambda{|o| o }
   end
 end
