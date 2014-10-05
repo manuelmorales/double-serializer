@@ -2,81 +2,13 @@ require_relative 'spec_helper'
 require 'double_dispatcher'
 
 RSpec.describe DoubleDispatcher do
-  before :all  do
-    MyModule = Module.new
-    MyClass = Class.new{ include MyModule }
-    MySubClass = Class.new(MyClass)
+  before do
+    stub_const 'MyModule', Module.new
+    stub_const 'MyClass', Class.new{ include MyModule }
+    stub_const 'MySubClass', Class.new(MyClass)
   end
 
-  let(:dispatcher){ DoubleDispatcher.new }
-  let(:target){ double('target') }
+  let(:dispatcher_class){ DoubleDispatcher }
 
-  it 'returns target as is by default' do
-    result = dispatcher.dispatch target
-    expect(result).to eq(target)
-  end
-
-  it 'calls the initialization block by default' do
-    dispatcher = DoubleDispatcher.new{|t| t.the_default_message }
-    expect(target).to receive(:the_default_message)
-
-    dispatcher.dispatch target
-  end
-
-  it 'returns the result of calling the default block' do
-    dispatcher = DoubleDispatcher.new{|t| t.the_default_message }
-    allow(target).to receive(:the_default_message).and_return(:the_response)
-
-    result = dispatcher.dispatch target
-    expect(result).to eq(:the_response)
-  end
-
-  it 'calls the block matching the class of the target' do
-    dispatcher[MyClass] = ->(t){ t.the_message }
-    target = MyClass.new
-
-    expect(target).to receive(:the_message)
-    dispatcher.dispatch target
-  end
-
-  it 'returns the result of calling the block' do
-    dispatcher[MyClass] = ->(t){ t.the_message }
-    target = MyClass.new
-    allow(target).to receive(:the_message).and_return(:the_response)
-
-    result = dispatcher.dispatch target
-    expect(result).to eq(:the_response)
-  end
-
-  it 'calls the block matching an ancestor class of the target' do
-    dispatcher[MyClass] = ->(t){ t.the_message }
-    target = MySubClass.new
-
-    expect(target).to receive(:the_message)
-    dispatcher.dispatch target
-  end
-
-  it 'calls the block matching an ancestor module of the target' do
-    dispatcher[MyModule] = ->(t){ t.the_message }
-    target = MyClass.new
-
-    expect(target).to receive(:the_message)
-    dispatcher.dispatch target
-  end
-
-  it 'allows defining processors when initializing' do
-    dispatcher = DoubleDispatcher.new(MyClass => ->(t){ t.the_message })
-    target = MyClass.new
-
-    expect(target).to receive(:the_message)
-    dispatcher.dispatch target
-  end
-
-  it 'allows defining processors whith a block using for()' do
-    dispatcher.for(MyClass){|t| t.the_message }
-    target = MyClass.new
-
-    expect(target).to receive(:the_message)
-    dispatcher.dispatch target
-  end
+  it_behaves_like 'double dispatcher'
 end

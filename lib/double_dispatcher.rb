@@ -1,4 +1,6 @@
 class DoubleDispatcher
+  autoload :Deep, 'double_dispatcher_deep'
+
   def dispatch target
     processors[target].call target
   end
@@ -23,9 +25,17 @@ class DoubleDispatcher
   end
 
   def build_processors_hash
-    hash = { Object => default_proc }
+    hash = initial_processors
     hash.default_proc = method(:match_ancestry)
     hash
+  end
+
+  def initial_processors
+    { Object => default_proc }.merge(specific_initial_processors)
+  end
+
+  def specific_initial_processors
+    {} # template method
   end
 
   def match_ancestry hash, target

@@ -31,28 +31,10 @@ class CustomSerializer
   end
 
   def build_dispatcher
-    dd = DoubleDispatcher.new
-    dd[Object]= method(:do_nothing)
-    dd[Hash] = method(:simplify_hash)
-    dd[Enumerable] = method(:simplify_array)
-    dd
+    DoubleDispatcher::Deep.new
   end
 
   def do_nothing object
     object
-  end
-
-  def simplify_array object
-    object.inject([]) do |array, value|
-      array << simplify(value)
-    end
-  end
-
-  def simplify_hash object
-    object.inject({}) do |hash, key_value|
-      key, value = key_value
-      hash[key] = simplify(value)
-      hash
-    end
   end
 end

@@ -1,7 +1,11 @@
 require'bundler'
 Bundler.require
 require'json'
+require'pry'
 
 RSpec.configure do |c|
   c.color = true
 end
+
+require 'double_dispatcher_shared'
+
