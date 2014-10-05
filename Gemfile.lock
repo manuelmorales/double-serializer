@@ -1,4 +1,10 @@
+PATH
+  remote: .
+  specs:
+    double_serializer (0.0.1)
+
 GEM
+  remote: https://rubygems.org/
   specs:
     coderay (1.1.0)
     diff-lcs (1.2.5)
@@ -7,6 +13,7 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    rake (10.3.2)
     rspec (3.1.0)
       rspec-core (~> 3.1.0)
       rspec-expectations (~> 3.1.0)
@@ -25,5 +32,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  pry
-  rspec
+  bundler (~> 1.7)
+  double_serializer!
+  pry (~> 0.10)
+  rake (~> 10.0)
+  rspec (~> 3.1.0)
