@@ -1,9 +1,12 @@
 require_relative 'spec_helper'
 require 'double_serializer'
 
-Doc = Struct.new :name, :format
 
 RSpec.describe DoubleSerializer do
+  before do
+    stub_const 'Doc', Struct.new(:name, :format)
+  end
+
   subject do
     serializer = DoubleSerializer.new{|simplified_object| simplified_object.to_json }
     serializer[Doc]= lambda{|doc| {name: "#{doc.name}.#{doc.format}"} }
