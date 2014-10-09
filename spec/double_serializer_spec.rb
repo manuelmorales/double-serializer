@@ -1,11 +1,11 @@
 require_relative 'spec_helper'
-require 'custom_serializer'
+require 'double_serializer'
 
 Doc = Struct.new :name, :format
 
-RSpec.describe CustomSerializer do
+RSpec.describe DoubleSerializer do
   subject do
-    serializer = CustomSerializer.new{|simplified_object| simplified_object.to_json }
+    serializer = DoubleSerializer.new{|simplified_object| simplified_object.to_json }
     serializer[Doc]= lambda{|doc| {name: "#{doc.name}.#{doc.format}"} }
     serializer
   end
@@ -65,7 +65,7 @@ RSpec.describe CustomSerializer do
   end
 
   it 'leaves as a hashes and arrays by default' do
-    serializer = CustomSerializer.new
+    serializer = DoubleSerializer.new
     serializer[Doc]= lambda{|doc| {name: "#{doc.name}.#{doc.format}"} }
     original = Doc.new('report', 'txt')
 
