@@ -75,4 +75,51 @@ RSpec.describe DoubleSerializer do
     result = serializer.serialize original
     expect(result).to eq({name:"report.txt"})
   end
+
+  context 'readme examples' do
+    it 'shows a basic example' do
+      stub_const('Animal', Struct.new(:name))
+      stub_const('Lion', Class.new(Animal))
+      stub_const('Meerkat', Class.new(Animal))
+
+      my_serializer = DoubleSerializer.new{|target| JSON.dump target }
+      my_serializer[Animal] = ->(animal){ {name: animal.name} }
+      my_serializer[Lion] = ->(lion){ {name: "King #{lion.name}"} }
+
+      zoo = [Lion.new('Simba'), Meerkat.new('Timon')]
+      result = my_serializer.serialize(zoo)
+      expect(result).to eq('[{"name":"King Simba"},{"name":"Timon"}]')
+    end
+
+    it 'shows bad nested serialization' do
+      stub_const('Animal', Struct.new(:name, :children))
+      stub_const('Lion', Class.new(Animal))
+
+      my_serializer = DoubleSerializer.new{|target| JSON.dump target }
+      my_serializer[Animal] = lambda do |animal|
+        {
+          name: animal.name,
+          children: animal.children.map{|c| my_serializer.serialize(c) }
+        }
+      end
+      result = my_serializer.serialize Lion.new('Mufasa', [Lion.new('Simba', [])])
+      expect(result).to eq('{"name":"Mufasa","children":["{\"name\":\"Simba\",\"children\":[]}"]}')
+    end
+
+    it 'shows good nested serialization' do
+      stub_const('Animal', Struct.new(:name, :children))
+      stub_const('Lion', Class.new(Animal))
+
+      my_serializer = DoubleSerializer.new{|target| JSON.dump target }
+
+      my_serializer[Animal] = lambda do |animal|
+        {
+          name: animal.name,
+          children: animal.children.map{|c| my_serializer.simplify(c) } # <- .simplify()
+        }
+      end
+      result = my_serializer.serialize Lion.new('Mufasa', [Lion.new('Simba', [])])
+      expect(result).to eq('{"name":"Mufasa","children":[{"name":"Simba","children":[]}]}')
+    end
+  end
 end
