@@ -20,9 +20,9 @@ $ bundle install
 Creating and using a custom serializer:
 
 ```ruby
-Animal = Struct.new(:name))
-Lion = Class.new(Animal))
-Meerkat = Class.new(Animal))
+Animal = Struct.new(:name)
+Lion = Class.new(Animal)
+Meerkat = Class.new(Animal)
 
 my_serializer = DoubleSerializer.new{|target| JSON.dump target }
 my_serializer[Animal] = ->(animal){ {name: animal.name} }
@@ -45,7 +45,7 @@ The second one is the true *serialize* step.
 In which the block called at initialization will be called.
 It has the purpose of taking the simplified object and converting it into a string.
 
-This two step process was introduced because serializers are usually not idempotent and can't be  nested.
+This two step process was introduced because serializers are usually not idempotent and can't be nested.
 However, _simplifiers_ are:
 
 ```ruby
