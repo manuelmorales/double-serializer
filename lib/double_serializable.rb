@@ -26,6 +26,24 @@ module DoubleSerializable
   end
 
   def serialize object
-    self.class.final_proc.call self.class.dispatcher.dispatch object
+    instance_exec(simplify(object), &final_proc)
+  end
+
+  def simplify object
+    instance_exec(object, &proc_for(object))
+  end
+
+  private
+
+  def final_proc
+    self.class.final_proc
+  end
+
+  def dispatcher
+    self.class.dispatcher
+  end
+
+  def proc_for obj
+    dispatcher[obj]
   end
 end

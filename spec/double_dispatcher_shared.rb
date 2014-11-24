@@ -72,4 +72,10 @@ RSpec.shared_examples_for 'double dispatcher' do
     expect(target).to receive(:the_message)
     dispatcher.dispatch target
   end
+
+  it 'allows resolving using []' do
+    block = ->(t){ t.the_message }
+    dispatcher[MyClass] = block
+    expect(dispatcher[MyClass]).to eq(block)
+  end
 end

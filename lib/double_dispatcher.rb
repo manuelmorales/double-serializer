@@ -13,6 +13,10 @@ class DoubleDispatcher
     self[key]= value
   end
 
+  def [] key
+    processors[key]
+  end
+
   private
 
   def initialize custom_processors = {}, &block
