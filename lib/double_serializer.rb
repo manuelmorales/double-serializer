@@ -39,3 +39,4 @@ class DoubleSerializer
     object
   end
 end
+

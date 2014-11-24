@@ -123,3 +123,4 @@ RSpec.describe DoubleSerializer do
     end
   end
 end
+
