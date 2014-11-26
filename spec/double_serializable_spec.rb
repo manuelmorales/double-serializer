@@ -1,14 +1,13 @@
 require_relative 'spec_helper'
-require 'double_serializable'
 
-RSpec.describe DoubleSerializable do
+RSpec.describe Serializable do
   before do
     stub_const 'Doc', Struct.new(:name, :format)
   end
 
   let(:klass) do
     Class.new do
-      include DoubleSerializable
+      include Serializable
       simplifies(Doc) { |doc| {name: "#{doc.name}.#{doc.format}"} }
       serializes { |obj| obj.to_json }
     end

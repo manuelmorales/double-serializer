@@ -1,6 +1,4 @@
 class DoubleDispatcher
-  autoload :Deep, 'double_dispatcher_deep'
-
   def dispatch target
     processors[target].call target
   end

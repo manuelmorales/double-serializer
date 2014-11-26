@@ -1,3 +1,3 @@
-class DoubleSerializer
-  VERSION = "0.0.1"
+module DoubleSerializer
+  VERSION = "0.1.0"
 end
