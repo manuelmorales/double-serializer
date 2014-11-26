@@ -1,6 +1,8 @@
-require 'double_dispatcher'
+require 'double_dispatchable'
 
 module DoubleSerializable
+  include DoubleDispatchable
+
   module ClassMethods
     def simplifies klass, &block
       dispatcher[klass] = block
@@ -42,40 +44,6 @@ module DoubleSerializable
   def proc_for obj
     dispatcher[obj]
   end
-
-  module DoubleDispatchable
-    module ClassMethods
-      def double_dispatch name, klass = nil, &block
-        unless double_dispatchers[name]
-          define_method name do |object|
-            instance_exec(object, &(double_dispatchers[name][object]))
-          end
-
-          double_dispatchers[name] = DoubleDispatcher.new
-        end
-
-        double_dispatchers[name][klass] = block if klass
-      end
-
-      def double_dispatchers
-        @double_dispatchers ||= {}
-      end
-
-      def inherited klass
-        klass.instance_variable_set(:@double_dispatchers, @double_dispatchers.dup)
-      end
-    end
-
-    def double_dispatchers
-      self.class.double_dispatchers
-    end
-
-    def self.included klass
-      klass.extend ClassMethods
-    end
-  end
-
-  include DoubleDispatchable
 
   double_dispatch :simplify, Enumerable do |object|
     object.inject([]) do |array, value|
