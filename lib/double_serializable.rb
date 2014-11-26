@@ -1,3 +1,5 @@
+require 'double_dispatcher'
+
 module DoubleSerializable
   module ClassMethods
     def simplifies klass, &block
