@@ -18,7 +18,7 @@ module DoubleSerializer
       end
 
       def final_proc
-        @final_proc
+        @final_proc ||= lambda {|o| o }
       end
     end
 

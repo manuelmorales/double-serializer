@@ -17,26 +17,51 @@ gem 'double_serializer'
 $ bundle install
 ```
 
-Creating and using a custom serializer:
+Creating and using a custom serializer.
+
+ * Include the module.
+ * Use the `simplifies` method to define how to convert each object to a simple objects, like a hash.
+ * Use the `serializes` method to define how finally convert such simplified object to a string.
+
 
 ```ruby
+require 'double_serializer'
+require 'json'
+
+# The serializable animals
 Animal = Struct.new(:name)
 Lion = Class.new(Animal)
 Meerkat = Class.new(Animal)
 
-my_serializer = DoubleSerializer.new{|target| JSON.dump target }
-my_serializer[Animal] = ->(animal){ {name: animal.name} }
-my_serializer[Lion] = ->(lion){ {name: "King #{lion.name}"} }
+# The serializer class
+class Serializer
+  include DoubleSerializer::Serializable
 
+  simplifies Animal do |animal|
+    {name: animal.name}
+  end
+
+  simplifies Lion do |lion|
+    {name: "King #{lion.name}"}
+  end
+
+  serializes do |obj|
+    JSON.dump obj
+  end
+end
+
+# Let's serialize something
+serializer = Serializer.new
 zoo = [Lion.new('Simba'), Meerkat.new('Timon')]
-result = my_serializer.serialize(zoo)
+
+result = serializer.serialize(zoo)
 # => [{"name":"King Simba"},{"name":"Timon"}]
 ```
 
 Notice how both of them are animals, but the serializer picked the best match for Lion.
 
 
-## Advanced usage
+## Explanation
 
 The serializer will actually serialize the objects in a two step process.
 The first one, called *simplify* is supposed to convert the target into a simple representation.
@@ -46,43 +71,44 @@ In which the block called at initialization will be called.
 It has the purpose of taking the simplified object and converting it into a string.
 
 This two step process was introduced because serializers are usually not idempotent and can't be nested.
-However, _simplifiers_ are:
+However, _simplifiers_ are.
+
+
+## Advanced usage
+
+Customise your serializer at will adding new methds to it.
+Everything runs within the instance of the serializer.
+This allows serializer customizations and nesting:
 
 ```ruby
-# BAD
+class Serializer
+  include DoubleSerializer::Serializable
+  attr_accessor :name_prefix
 
-Animal = Struct.new(:name, :children)
-Lion = Class.new(Animal)
+  simplifies Animal do |animal|
+    result = {}
+    result[:name] = "#{name_prefix} #{animal.name}"            # Using an instance method of the serializer
+    result[:father] = simplify(animal.father) if animal.father # Nesting
+    result
+  end
 
-my_serializer = DoubleSerializer.new{|target| JSON.dump target }
-my_serializer[Animal] = lambda do |animal|
-  {
-    name: animal.name,
-    children: animal.children.map{|c| my_serializer.serialize(c) }
-  }
-end
-result = my_serializer.serialize Lion.new('Mufasa', [Lion.new('Simba', [])])
-# => {"name":"Mufasa","children":["{\"name\":\"Simba\",\"children\":[]}"]}
-
-```
-
-Notice how Simba's quotes are scaped. It has been serialized twice :unamused:.
-The right way of doing it is to nest simplifications, not serialization:
-
-```ruby
-# GOOD
-
-my_serializer[Animal] = lambda do |animal|
-  {
-    name: animal.name,
-    children: animal.children.map{|c| my_serializer.simplify(c) } # <- .simplify()
-  }
+  serializes do |obj|
+    JSON.dump obj
+  end
 end
 
-result = my_serializer.serialize Lion.new('Mufasa', [Lion.new('Simba', [])])
-# => {"name":"Mufasa","children":[{"name":"Simba","children":[]}]}
+serializer = Serializer.new
+serializer.name_prefix = 'An animal called'
+simba = Lion.new('Simba', Lion.new('Mufasa'))
 
+result = serializer.serialize(simba)
+# => {"name":"An animal called Simba","father":{"name":"An animal called Mufasa"}}
 ```
+
+Another important point is inheritance.
+You can create subclasses of your Serializer which will try to match their own simplifiers first
+and delegate to the parent class when none found.
+
 
 ## Contributing
 

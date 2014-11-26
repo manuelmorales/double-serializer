@@ -74,5 +74,14 @@ RSpec.describe Serializable do
     result = subject.serialize original
     expect(result).to eq('{"name":"complex_report"}')
   end
+
+  it 'returns the result of simplifying if no final proc is given' do
+    klass = Class.new{ include Serializable }
+    subject = klass.new
+
+    original = {'a' => 1}
+    result = subject.serialize(original)
+    expect(result).to eq(original)
+  end
 end
 
