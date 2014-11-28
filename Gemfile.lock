@@ -3,6 +3,11 @@ PATH
   specs:
     double_serializer (0.1.0)
 
+PATH
+  remote: ../double_dispatch
+  specs:
+    double_dispatch (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -33,6 +38,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.7)
+  double_dispatch!
   double_serializer!
   pry (~> 0.10)
   rake (~> 10.0)

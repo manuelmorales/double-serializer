@@ -1,8 +1,8 @@
-require 'double_dispatchable'
+require 'double_dispatch'
 
 module DoubleSerializer
   module Serializable
-    include DoubleDispatchable
+    include DoubleDispatch::Dispatchable
 
     module ClassMethods
       def simplifies klass, &block
@@ -23,7 +23,7 @@ module DoubleSerializer
     end
 
     def self.included klass
-      klass.extend DoubleDispatchable::ClassMethods
+      klass.extend DoubleDispatch::Dispatchable::ClassMethods
       klass.extend ClassMethods
       klass.instance_variable_set(:@double_dispatchers, double_dispatchers.dup)
     end

@@ -10,5 +10,3 @@ end
 require 'double_serializer'
 include DoubleSerializer
 
-require 'double_dispatcher_shared'
-
