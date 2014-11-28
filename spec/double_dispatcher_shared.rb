@@ -4,9 +4,8 @@ RSpec.shared_examples_for 'double dispatcher' do
   let(:target){ double('target') }
   let(:dispatcher){ dispatcher_class.new }
 
-  it 'returns target as is by default' do
-    result = dispatcher.dispatch target
-    expect(result).to eq(target)
+  it 'raises NotImplementedError by default' do
+    expect{ subject.dispatch(Object.new) }.to raise_error(NotImplementedError)
   end
 
   it 'calls the initialization block by default' do

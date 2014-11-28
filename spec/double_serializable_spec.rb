@@ -83,5 +83,15 @@ RSpec.describe Serializable do
     result = subject.serialize(original)
     expect(result).to eq(original)
   end
+
+  it 'raises an exception when the object is of a non supported class' do
+    expect{ subject.serialize(Object.new) }.to raise_error(NotImplementedError)
+  end
+
+  it 'leaves some basic objects untouched' do
+    [1, -1, 1.2, 'a', :a, true, false].each do |obj|
+      expect(subject.simplify(obj)).to eq obj
+    end
+  end
 end
 

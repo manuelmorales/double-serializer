@@ -47,6 +47,6 @@ class DoubleDispatcher
   end
 
   def default_proc
-    @default_proc ||= lambda{|t| t }
+    @default_proc ||= lambda{|t| raise(NotImplementedError.new("Don't know how to process #{t.inspect}")) }
   end
 end

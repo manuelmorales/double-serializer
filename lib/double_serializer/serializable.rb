@@ -60,6 +60,14 @@ module DoubleSerializer
       end
     end
 
+    [Numeric, String, NilClass, TrueClass, FalseClass, Symbol].each do |klass|
+      double_dispatch(:simplify, klass) { |object| object }
+    end
+
+    double_dispatch :simplify, Object do |object|
+      raise(NotImplementedError.new("Don't know how to process #{object.inspect}"))
+    end
+
     def dispatcher
       double_dispatchers[:simplify]
     end
